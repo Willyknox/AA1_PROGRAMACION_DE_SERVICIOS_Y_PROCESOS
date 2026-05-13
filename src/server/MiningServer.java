@@ -20,7 +20,6 @@ public class MiningServer {
 
     private boolean blockSolved = false;
 
-
     public void startServer() {
         try {
             ServerSocket serverSocket = new ServerSocket(port);
@@ -34,12 +33,22 @@ public class MiningServer {
                 ClientHandler client = new ClientHandler(clientSocket, this);
                 clientList.add(client);
                 client.start();
+
+                // --- DISPARADOR AUTOMÁTICO ---
+                // Si es el primer minero en conectarse, le mandamos un bloque para minar
+                if (clientList.size() == 1) {
+                    // Esperamos medio segundo para dar tiempo al handshake de conexión
+                    new Thread(() -> {
+                        try { Thread.sleep(500); } catch (Exception e) {}
+                        sendNewBlock(2);
+                    }).start();
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    
+
     // sends a message to all connected clientList simultaneously
     public void broadcast(String message) {
         for (ClientHandler client : clientList) {
@@ -105,4 +114,5 @@ public class MiningServer {
             miner.sendMessage("sol_result|invalid");
         }
     }
+    
 }
