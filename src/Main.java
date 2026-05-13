@@ -1,13 +1,21 @@
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-void main() {
-    //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-    // to see how IntelliJ IDEA suggests fixing it.
-    IO.println(String.format("Hello and welcome!"));
+import utils.HashUtils;
+import utils.Transaction;
 
-    for (int i = 1; i <= 5; i++) {
-        //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-        // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-        IO.println("i = " + i);
+public class Main {
+    public static void main(String[] args) {
+        // generate a random transaction to simulate network activity
+        Transaction tx = Transaction.generateRandom();
+        System.out.println("Transacción a minar: " + tx);
+
+        // test how adding a different salt changes the entire resulting hash completely
+        String data = tx.toString();
+
+        // try hashing with salt 0
+        String hash0 = HashUtils.sha256(data + 0);
+        System.out.println("Hash con salt 0: " + hash0);
+
+        // try hashing with salt 1
+        String hash1 = HashUtils.sha256(data + 1);
+        System.out.println("Hash con salt 1: " + hash1);
     }
 }
