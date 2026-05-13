@@ -38,48 +38,48 @@ public class MiningClient {
         }
     }
 
-        private void listenToServer() {
+    private void listenToServer() {
         try {
             String line;
             // Bucle infinito escuchando al servidor
             while ((line = in.readLine()) != null) {
-                
+
                 // Petición de minado: new_request|<dificultad>|<datos>
                 if (line.startsWith("new_request|")) {
                     String[] parts = line.split("\\|");
                     int difficulty = Integer.parseInt(parts[1]);
                     String blockData = parts[2];
-                    
+
                     System.out.println("\n--- New Mining Job Received ---");
                     System.out.println("Block Data: " + blockData);
                     System.out.println("Target Difficulty: " + difficulty + " zero(s)");
-                    
+
                     // Respondemos con ack
                     out.println("ack");
-                    
+
                     // Construimos los ceros de la dificultad
                     StringBuilder targetPrefixBuilder = new StringBuilder();
                     for (int i = 0; i < difficulty; i++) {
                         targetPrefixBuilder.append("0");
                     }
                     String targetPrefix = targetPrefixBuilder.toString();
-                    
+
                     // --- BUCLE DE FUERZA BRUTA ---
                     int salt = 0;
                     String hash;
                     System.out.println("Mining in progress... Please wait.");
-                    
+
                     long startTime = System.currentTimeMillis();
                     while (true) {
                         hash = utils.HashUtils.sha256(blockData + salt);
-                        
+
                         if (hash.startsWith(targetPrefix)) {
                             long duration = System.currentTimeMillis() - startTime;
                             System.out.println("SUCCESS! Valid Hash found!");
                             System.out.println("Salt: " + salt);
                             System.out.println("Hash: " + hash);
                             System.out.println("Time taken: " + duration + " ms");
-                            
+
                             // Enviamos la solución: sol|<salt>
                             out.println("sol|" + salt);
                             break;
@@ -98,7 +98,6 @@ public class MiningClient {
             System.out.println("Disconnected from listening loop.");
         }
     }
-
 
     public void disconnect() {
         try {

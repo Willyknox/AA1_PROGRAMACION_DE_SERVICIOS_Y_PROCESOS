@@ -39,7 +39,10 @@ public class MiningServer {
                 if (clientList.size() == 1) {
                     // Esperamos medio segundo para dar tiempo al handshake de conexión
                     new Thread(() -> {
-                        try { Thread.sleep(500); } catch (Exception e) {}
+                        try {
+                            Thread.sleep(500);
+                        } catch (Exception e) {
+                        }
                         sendNewBlock(2);
                     }).start();
                 }
@@ -65,7 +68,8 @@ public class MiningServer {
         StringBuilder blockData = new StringBuilder();
         for (int i = 0; i < 3; i++) {
             blockData.append(utils.Transaction.generateRandom().toString());
-            if (i < 2) blockData.append(","); // separador de transacciones
+            if (i < 2)
+                blockData.append(","); // separador de transacciones
         }
 
         this.currentBlockData = blockData.toString();
@@ -114,5 +118,5 @@ public class MiningServer {
             miner.sendMessage("sol_result|invalid");
         }
     }
-    
+
 }
