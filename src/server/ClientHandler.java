@@ -19,10 +19,11 @@ public class ClientHandler extends Thread {
         this.socket = socket;
         this.server = server;
         try {
-            // TODO 1: Initialize 'in' using new BufferedReader(new InputStreamReader(socket.getInputStream()))
+            // initialize input stream reader
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             
-            // TODO 2: Initialize 'out' using new PrintWriter(socket.getOutputStream(), true) // 'true' enables autoflush
-            
+            // initialize output print writer with autoflush enabled
+            out = new PrintWriter(socket.getOutputStream(), true);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -30,26 +31,37 @@ public class ClientHandler extends Thread {
 
     // helper method to send data to this specific client
     public void sendMessage(String msg) {
-        // TODO 3: Send the message using out.println(msg)
+        if (out != null) {
+            out.println(msg);
+        }
     }
 
     @Override
     public void run() {
         try {
             String line;
-            // TODO 4: Read lines from 'in' using a while((line = in.readLine()) != null) loop
-            
-                // TODO 5: If the line starts with "connect|", extract the name using line.substring(...) or line.split("\\|")
-                // Save the name in 'minerName', print a welcome log, and send back an "ack" message using sendMessage("ack")
-                
-                // TODO 6: If the line equals "disconnect", break the loop to end the thread
-                
+            // read lines from miner until disconnected
+            while ((line = in.readLine()) != null) {
+                if (line.startsWith("connect|")) {
+                    // extract miner name after "connect|"
+                    minerName = line.substring(8);
+                    System.out.println("Miner logged in: " + minerName);
+                    // confirm login to client
+                    sendMessage("ack");
+                } else if (line.equals("disconnect")) {
+                    System.out.println("Miner requested disconnect: " + minerName);
+                    break;
+                }
+            }
         } catch (Exception e) {
             System.out.println("Connection error with miner: " + minerName);
         } finally {
             try {
-                // TODO 7: Close the socket and call server.removeClient(this) to clean up the list
-                
+                // close socket and unregister from server
+                if (socket != null) {
+                    socket.close();
+                }
+                server.removeClient(this);
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -18,11 +18,11 @@ public class MiningServer {
         try {
             ServerSocket serverSocket = new ServerSocket(port);
             System.out.println("Server started on port " + port + ". Waiting for miners...");
-            
+
             while (true) {
                 // accept incoming connections from miners
                 Socket clientSocket = serverSocket.accept();
-                
+
                 // create a separate thread for each client and start it
                 ClientHandler client = new ClientHandler(clientSocket, this);
                 clients.add(client);
