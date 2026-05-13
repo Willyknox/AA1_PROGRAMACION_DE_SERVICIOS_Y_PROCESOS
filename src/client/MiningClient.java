@@ -53,6 +53,7 @@ public class MiningClient {
             System.out.println("Disconnected from server.");
         } catch (Exception e) {
             e.printStackTrace();
+        }
     }
 
     public static void main(String[] args) {
