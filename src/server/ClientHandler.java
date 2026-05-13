@@ -36,6 +36,10 @@ public class ClientHandler extends Thread {
         }
     }
 
+    public String getMinerName() {
+        return minerName;
+    }
+
     @Override
     public void run() {
         try {
@@ -51,6 +55,11 @@ public class ClientHandler extends Thread {
                 } else if (line.equals("disconnect")) {
                     System.out.println("Miner requested disconnect: " + minerName);
                     break;
+                } else if (line.startsWith("sol|")) {
+                    int salt = Integer.parseInt(line.substring(4));
+                    System.out.println("Solution candidate received from " + minerName + " with salt: " + salt);
+                    // Verify solution on the server side
+                    server.verifySolution(this, salt);
                 }
             }
         } catch (Exception e) {

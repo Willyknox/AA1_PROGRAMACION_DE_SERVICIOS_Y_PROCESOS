@@ -14,6 +14,13 @@ public class MiningServer {
     // thread-safe list to store all currently connected client threads
     private List<ClientHandler> clientList = new CopyOnWriteArrayList<>();
 
+    private String currentBlockData = "";
+
+    private int currentDifficulty = 2;
+
+    private boolean blockSolved = false;
+
+
     public void startServer() {
         try {
             ServerSocket serverSocket = new ServerSocket(port);
@@ -32,33 +39,33 @@ public class MiningServer {
             e.printStackTrace();
         }
     }
-
+    
     // sends a message to all connected clientList simultaneously
     public void broadcast(String message) {
         for (ClientHandler client : clientList) {
             client.sendMessage(message);
         }
     }
-        // Genera un bloque de transacciones aleatorias y lo envía a los mineros
 
+    // Genera un bloque de transacciones aleatorias y lo envía a los mineros
     public void sendNewBlock(int difficulty) {
-        
-        // 1. Generamos por ejemplo 3 transacciones aleatorias unidas por comas
+        this.currentDifficulty = difficulty;
+        this.blockSolved = false;
 
+        // 1. Generamos por ejemplo 3 transacciones aleatorias unidas por comas
         StringBuilder blockData = new StringBuilder();
         for (int i = 0; i < 3; i++) {
             blockData.append(utils.Transaction.generateRandom().toString());
             if (i < 2) blockData.append(","); // separador de transacciones
         }
-        
-        String blockString = blockData.toString();
-        System.out.println("Broadcasting new block (Difficulty " + difficulty + "): " + blockString);
-        
+
+        this.currentBlockData = blockData.toString();
+        System.out.println("Broadcasting new block (Difficulty " + difficulty + "): " + currentBlockData);
+
         // 2. Enviamos el mensaje a todos con el formato del plan:
         // new_request|<dificultad>|<datos_transacciones>
-        broadcast("new_request|" + difficulty + "|" + blockString);
+        broadcast("new_request|" + difficulty + "|" + currentBlockData);
     }
-
 
     // removes a client from the active list when they disconnect
     public void removeClient(ClientHandler client) {
@@ -69,5 +76,33 @@ public class MiningServer {
     public static void main(String[] args) {
         MiningServer server = new MiningServer();
         server.startServer();
+    }
+
+    // Valida la solución enviada por un minero de forma sincronizada
+    public synchronized void verifySolution(ClientHandler miner, int salt) {
+        if (blockSolved) {
+            // Ya fue resuelto por otro minero más rápido
+            miner.sendMessage("sol_result|invalid");
+            return;
+        }
+
+        String hash = utils.HashUtils.sha256(currentBlockData + salt);
+        StringBuilder targetBuilder = new StringBuilder();
+        for (int i = 0; i < currentDifficulty; i++) {
+            targetBuilder.append("0");
+        }
+        String targetPrefix = targetBuilder.toString();
+
+        if (hash.startsWith(targetPrefix)) {
+            blockSolved = true;
+            System.out.println("\n🎉 WINNER! Miner " + miner.getMinerName() + " successfully solved the block!");
+            System.out.println("Winning Hash: " + hash);
+
+            // Avisamos a toda la red de que el minado ha terminado
+            broadcast("end|" + miner.getMinerName());
+        } else {
+            // Hizo trampas o el hash está mal calculado
+            miner.sendMessage("sol_result|invalid");
+        }
     }
 }

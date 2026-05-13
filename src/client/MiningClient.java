@@ -86,6 +86,12 @@ public class MiningClient {
                         }
                         salt++;
                     }
+                } else if (line.startsWith("end|")) {
+                    String winner = line.substring(4);
+                    System.out.println("\n🛑 ROUND ENDED! Miner [" + winner + "] solved the block!");
+                } else if (line.startsWith("sol_result|")) {
+                    String result = line.substring(11);
+                    System.out.println("Server verification result: " + result.toUpperCase());
                 }
             }
         } catch (Exception e) {
