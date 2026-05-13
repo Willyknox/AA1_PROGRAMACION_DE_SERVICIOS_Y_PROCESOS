@@ -20,17 +20,17 @@ public class MiningClient {
 
     public void start() {
         try {
-            // Assign to the class attribute instead of creating a local variable
+            // assign to the class attribute instead of creating a local variable
             socket = new Socket(serverAddress, serverPort);
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            // Send login message
+            // send login message
             out.println("connect|" + minerName);
             String response = in.readLine();
             if ("ack".equals(response)) {
                 System.out.println("Connected to server successfully as: " + minerName);
-                // Listen for jobs from the server
+                // listen for jobs from the server
                 listenToServer();
             }
         } catch (Exception e) {
@@ -41,10 +41,10 @@ public class MiningClient {
     private void listenToServer() {
         try {
             String line;
-            // Bucle infinito escuchando al servidor
+            // infinite loop listening to the server
             while ((line = in.readLine()) != null) {
 
-                // Petición de minado: new_request|<dificultad>|<datos>
+                // mining request format: new_request|<difficulty>|<data>
                 if (line.startsWith("new_request|")) {
                     String[] parts = line.split("\\|");
                     int difficulty = Integer.parseInt(parts[1]);
@@ -54,17 +54,17 @@ public class MiningClient {
                     System.out.println("Block Data: " + blockData);
                     System.out.println("Target Difficulty: " + difficulty + " zero(s)");
 
-                    // Respondemos con ack
+                    // respond with ack to confirm reception
                     out.println("ack");
 
-                    // Construimos los ceros de la dificultad
+                    // build the difficulty zero target string
                     StringBuilder targetPrefixBuilder = new StringBuilder();
                     for (int i = 0; i < difficulty; i++) {
                         targetPrefixBuilder.append("0");
                     }
                     String targetPrefix = targetPrefixBuilder.toString();
 
-                    // --- BUCLE DE FUERZA BRUTA ---
+                    // --- brute force search loop ---
                     int salt = 0;
                     String hash;
                     System.out.println("Mining in progress... Please wait.");
@@ -80,7 +80,7 @@ public class MiningClient {
                             System.out.println("Hash: " + hash);
                             System.out.println("Time taken: " + duration + " ms");
 
-                            // Enviamos la solución: sol|<salt>
+                            // send solution to server: sol|<salt>
                             out.println("sol|" + salt);
                             break;
                         }
