@@ -39,6 +39,26 @@ public class MiningServer {
             client.sendMessage(message);
         }
     }
+        // Genera un bloque de transacciones aleatorias y lo envía a los mineros
+
+    public void sendNewBlock(int difficulty) {
+        
+        // 1. Generamos por ejemplo 3 transacciones aleatorias unidas por comas
+
+        StringBuilder blockData = new StringBuilder();
+        for (int i = 0; i < 3; i++) {
+            blockData.append(utils.Transaction.generateRandom().toString());
+            if (i < 2) blockData.append(","); // separador de transacciones
+        }
+        
+        String blockString = blockData.toString();
+        System.out.println("Broadcasting new block (Difficulty " + difficulty + "): " + blockString);
+        
+        // 2. Enviamos el mensaje a todos con el formato del plan:
+        // new_request|<dificultad>|<datos_transacciones>
+        broadcast("new_request|" + difficulty + "|" + blockString);
+    }
+
 
     // removes a client from the active list when they disconnect
     public void removeClient(ClientHandler client) {
