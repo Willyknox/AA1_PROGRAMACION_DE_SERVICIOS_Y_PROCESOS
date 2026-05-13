@@ -10,6 +10,9 @@ public class Main {
         // test how adding a different salt changes the entire resulting hash completely
         String data = tx.toString();
 
+
+        // test to check if the hash changes
+
         // try hashing with salt 0
         String hash0 = HashUtils.sha256(data + 0);
         System.out.println("Hash con salt 0: " + hash0);

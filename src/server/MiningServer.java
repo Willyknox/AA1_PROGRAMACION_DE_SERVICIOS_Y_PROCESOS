@@ -12,7 +12,7 @@ public class MiningServer {
     private int port = 5000;
 
     // thread-safe list to store all currently connected client threads
-    private List<ClientHandler> clients = new CopyOnWriteArrayList<>();
+    private List<ClientHandler> clientList = new CopyOnWriteArrayList<>();
 
     public void startServer() {
         try {
@@ -25,7 +25,7 @@ public class MiningServer {
 
                 // create a separate thread for each client and start it
                 ClientHandler client = new ClientHandler(clientSocket, this);
-                clients.add(client);
+                clientList.add(client);
                 client.start();
             }
         } catch (IOException e) {
@@ -33,17 +33,17 @@ public class MiningServer {
         }
     }
 
-    // sends a message to all connected clients simultaneously
+    // sends a message to all connected clientList simultaneously
     public void broadcast(String message) {
-        for (ClientHandler client : clients) {
+        for (ClientHandler client : clientList) {
             client.sendMessage(message);
         }
     }
 
     // removes a client from the active list when they disconnect
     public void removeClient(ClientHandler client) {
-        clients.remove(client);
-        System.out.println("A miner disconnected. Active connections: " + clients.size());
+        clientList.remove(client);
+        System.out.println("A miner disconnected. Active connections: " + clientList.size());
     }
 
     public static void main(String[] args) {
