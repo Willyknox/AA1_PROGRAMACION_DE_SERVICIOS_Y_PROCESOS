@@ -75,9 +75,15 @@ public class MiningServer {
         this.currentBlockData = blockData.toString();
         System.out.println("Broadcasting new block (Difficulty " + difficulty + "): " + currentBlockData);
 
-        // 2. Enviamos el mensaje a todos con el formato del plan:
-        // new_request|<dificultad>|<datos_transacciones>
-        broadcast("new_request|" + difficulty + "|" + currentBlockData);
+        // 2. send tailored mining requests with specific salt ranges to avoid duplicate work
+        // format: new_request|<difficulty>|<blockData>|<startSalt>|<endSalt>
+        int rangeSize = 1000000; // each miner searches a subset of 1 million salts
+        for (int index = 0; index < clientList.size(); index++) {
+            ClientHandler client = clientList.get(index);
+            int startSalt = index * rangeSize;
+            int endSalt = startSalt + rangeSize - 1;
+            client.sendMessage("new_request|" + difficulty + "|" + currentBlockData + "|" + startSalt + "|" + endSalt);
+        }
     }
 
     // removes a client from the active list when they disconnect

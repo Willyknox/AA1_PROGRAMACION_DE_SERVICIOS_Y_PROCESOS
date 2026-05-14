@@ -44,15 +44,18 @@ public class MiningClient {
             // infinite loop listening to the server
             while ((line = in.readLine()) != null) {
 
-                // mining request format: new_request|<difficulty>|<data>
+                // mining request format: new_request|<difficulty>|<data>|<startSalt>|<endSalt>
                 if (line.startsWith("new_request|")) {
                     String[] parts = line.split("\\|");
                     int difficulty = Integer.parseInt(parts[1]);
                     String blockData = parts[2];
+                    int startSalt = parts.length > 3 ? Integer.parseInt(parts[3]) : 0;
+                    int endSalt = parts.length > 4 ? Integer.parseInt(parts[4]) : Integer.MAX_VALUE;
 
                     System.out.println("\n--- New Mining Job Received ---");
                     System.out.println("Block Data: " + blockData);
                     System.out.println("Target Difficulty: " + difficulty + " zero(s)");
+                    System.out.println("Assigned Search Bounds: [" + startSalt + " - " + (endSalt == Integer.MAX_VALUE ? "∞" : endSalt) + "]");
 
                     // respond with ack to confirm reception
                     out.println("ack");
@@ -65,12 +68,12 @@ public class MiningClient {
                     String targetPrefix = targetPrefixBuilder.toString();
 
                     // --- brute force search loop ---
-                    int salt = 0;
+                    int salt = startSalt;
                     String hash;
                     System.out.println("Mining in progress... Please wait.");
 
                     long startTime = System.currentTimeMillis();
-                    while (true) {
+                    while (salt <= endSalt) {
                         hash = utils.HashUtils.sha256(blockData + salt);
 
                         if (hash.startsWith(targetPrefix)) {
